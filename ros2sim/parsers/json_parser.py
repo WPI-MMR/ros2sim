@@ -18,6 +18,7 @@ class JsonParser(parsers.Parser):
     }
 
   def parse(self, input_str: str) -> str:
+    resp =  None
     for cmd, func in self._COMMAND_MAPPING.items():
       if input_str.startswith(cmd.value):
         resp = func(input_str[len(cmd.value):])

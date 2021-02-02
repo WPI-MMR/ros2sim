@@ -9,3 +9,4 @@ class special(enum.Enum):
 
 
 from .base_parser import Parser
+from.json_parser import JsonParser
