@@ -27,6 +27,7 @@ class SerialSimulator:
     Realtime Simulation now active.
     Serving on {}
     """.format(s_name))
+    thread.join()
 
   def listener(self):
     while True:
