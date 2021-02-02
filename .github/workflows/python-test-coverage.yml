@@ -28,7 +28,7 @@ jobs:
         python -m unittest discover -v
     - name: Generate coverage report
       run: |
-        coverage run --source=gym_solo -m unittest discover
+        coverage run --source=ros2sim -m unittest discover
         coverage report
     - name: Coveralls
       env:
