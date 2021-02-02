@@ -43,7 +43,7 @@ class TestJsonParser(unittest.TestCase):
     ('extra_stuff', b'extra_stuff'),
   ])
   def test_get_obs(self, name, cmd):
-    dummy_obs = ['lbl1', 'lbl2', 'lbl3'], [1., 2., 3.] 
+    dummy_obs = [1., 2., 3.], ['lbl1', 'lbl2', 'lbl3']
     self.env_stub.get_obs.return_value = dummy_obs
 
     encoded_obs = {
