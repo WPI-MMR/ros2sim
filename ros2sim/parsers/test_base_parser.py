@@ -8,7 +8,6 @@ class DummyParser(Parser):
     pass
 
 
-
 class TestBasicParser(unittest.TestCase):
   def test_construction(self):
     env = 'test'
