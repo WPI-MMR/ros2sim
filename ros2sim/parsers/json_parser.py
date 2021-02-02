@@ -54,6 +54,7 @@ class JsonParser(parsers.Parser):
       action = [action_dict[joint] for joint in self.env.joint_ordering]
       if len(action) != len(self.env.joint_ordering):
         raise
+
       self.env.step(action)
     except:
       raise ValueError('The action needs to have the same number of joint as '
