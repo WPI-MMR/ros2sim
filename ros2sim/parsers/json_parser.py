@@ -1,4 +1,7 @@
+from typing import Text
+
 from ros2sim import parsers
+import json
 
 
 class JsonParser(parsers.Parser):
@@ -27,8 +30,15 @@ class JsonParser(parsers.Parser):
     """Reset the environment."""
     self.env.reset()
 
-  def get_obs(self, _):
-    pass
+  def get_obs(self, _) -> Text:
+    """Get the current observation of the robot.
+
+    Returns:
+      str: A JSON-encoded string of a dictionary of the registered observation
+        and the respective values.
+    """
+    labels, values = self.env.get_obs()
+    return json.dumps(dict(zip(labels, values)))
 
   def action(self, _):
     pass

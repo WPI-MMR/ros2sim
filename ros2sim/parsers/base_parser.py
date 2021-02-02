@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Text
 
-import gym
-
 
 class Parser(ABC):
   """A generic parser class."""
