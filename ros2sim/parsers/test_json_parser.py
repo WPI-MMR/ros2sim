@@ -66,6 +66,12 @@ class TestJsonParser(unittest.TestCase):
     self.env_stub.joint_ordering = ['j1', 'j2', 'j3']
     self.parser.action(json.dumps(sent_actions))
     self.env_stub.step.assert_called_once_with(expected_input)
+
+  def test_too_few_actions(self):
+    self.env_stub.joint_ordering = ['j1', 'j2', 'j3']
+    action = {'j1': 1., 'j2': 2.,}
+    with self.assertRaises(ValueError):
+      self.parser.action(json.dumps(action))
     
 
 if __name__ == '__main__':
