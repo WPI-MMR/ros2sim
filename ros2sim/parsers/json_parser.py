@@ -24,7 +24,8 @@ class JsonParser(parsers.Parser):
     return resp
 
   def reset(self, _):
-    pass
+    """Reset the environment."""
+    self.env.reset()
 
   def get_obs(self, _):
     pass

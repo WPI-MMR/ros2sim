@@ -30,6 +30,13 @@ class TestJsonParser(unittest.TestCase):
       mock_method.assert_called_once_with(input_str)
       self.assertEqual(resp, s.OK.value)
 
+  @parameterized.expand([
+    ('simple', b''),
+    ('extra_stuff', b'extra_stuff'),
+  ])
+  def test_reset(self, name, cmd):
+    self.parser.reset(cmd)
+    self.env_stub.reset.assert_called_once()
 
 if __name__ == '__main__':
   unittest.main()
