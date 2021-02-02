@@ -18,14 +18,13 @@ class JsonParser(parsers.Parser):
     }
 
   def parse(self, input_str: str) -> str:
-    resp =  None
+    resp = None
     for cmd, func in self._COMMAND_MAPPING.items():
       if input_str.startswith(cmd.value):
         resp = func(input_str[len(cmd.value):])
         break
 
-    resp = resp or parsers.special.OK.value
-    return resp
+    return resp.encode() if resp else parsers.special.OK.value
 
   def reset(self, _):
     """Reset the environment."""
@@ -38,7 +37,7 @@ class JsonParser(parsers.Parser):
       str: A JSON-encoded string of a dictionary of the registered observation
         and the respective values.
     """
-    labels, values = self.env.get_obs()
+    values, labels = self.env.get_obs()
     return json.dumps(dict(zip(labels, values)))
 
   def action(self, cmd):
