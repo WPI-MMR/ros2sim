@@ -40,5 +40,19 @@ class JsonParser(parsers.Parser):
     labels, values = self.env.get_obs()
     return json.dumps(dict(zip(labels, values)))
 
-  def action(self, _):
-    pass
+  def action(self, cmd):
+    """Apply the action to the robot.
+
+    Note that in this case, these values will usually be motor position values.
+
+    Args:
+      cmd ([str]): JSON encoded dictionary of motor values
+    """
+    action_dict = json.loads(cmd)
+    action = [action_dict[joint] for joint in self.env.joint_ordering]
+    
+    if len(action) != len(self.env.joint_ordering):
+      raise ValueError('The action needs to have the same number of joint as '
+                       'the robot')
+
+    self.env.step(action)

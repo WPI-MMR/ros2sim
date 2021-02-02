@@ -58,5 +58,15 @@ class TestJsonParser(unittest.TestCase):
     self.env_stub.get_obs.assert_called_once()
     self.assertEqual(resp, encoded_str)
 
+  @parameterized.expand([
+    ('simple', {'j1': 1., 'j2': 2., 'j3': 3.,}, [1., 2., 3]), 
+    ('extra', {'j1': 1., 'j2': 2., 'j3': 3., 'j4': 4.,}, [1., 2., 3]), 
+  ])
+  def test_action(self, name, sent_actions, expected_input):
+    self.env_stub.joint_ordering = ['j1', 'j2', 'j3']
+    self.parser.action(json.dumps(sent_actions))
+    self.env_stub.step.assert_called_once_with(expected_input)
+    
+
 if __name__ == '__main__':
   unittest.main()
