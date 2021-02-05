@@ -53,7 +53,7 @@ class JsonParser(parsers.Parser):
     try:
       action = [action_dict[joint] for joint in self.env.joint_ordering]
       if len(action) != len(self.env.joint_ordering):
-        raise
+        raise ValueError
 
       self.env.step(action)
     except:
