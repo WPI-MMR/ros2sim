@@ -9,7 +9,7 @@ if __name__ == '__main__':
   try:
     while True:
       cmd = input('Send the following command: ')
-      ser.write(cmd.encode() + s.EOM.value)
+      ser.write(cmd.encode())# + s.EOM.value)
 
       res = b''
       while not res.endswith(s.EOM.value):

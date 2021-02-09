@@ -22,10 +22,12 @@ class SerialSimulator:
     self.temp_packet_data = JointInformation()
     self.validated_packed_data = JointInformation()
     self.serial_read_state = SerialReadState.INIT
+    self.serial_port_name = None
 
   def serve(self):
     self.master, slave = pty.openpty()
     s_name = os.ttyname(slave)
+    self.slave = slave
 
     thread = threading.Thread(target=self.listener)
     thread.start()
@@ -54,4 +56,34 @@ class SerialSimulator:
     """Checks to see if there is any data over the serial port to read. If there is,
     this method reads it and fills up the corresponding data structures. 
     """
-    pass
+    
+    # Counter to check for the number of ints in preamble
+    preamble_counter = self.PREAMBLE_LENGTH
+    # Counter to check the number of for each joint angle
+    data_byte_counter = self.DATA_BYTE_LENGTH
+    # Running checksum used to determine the validity of the incoming packet.
+    # We don't expect the mocking serial to have issues with the packed validity
+    # but this is being implemented to keep with consistency of the Arduino code
+    calculated_checksum = 0xFF
+    # Data that is going to be read of serial. This is going to block here untill it reads.
+    # Arduino has a non blocking version of this same code.
+    # TODO: Evaluate if it can be made non blocking
+    received_data = os.read(self.master, 1)
+
+    if self.serial_read_state == SerialReadState.INIT:
+      # Initializing checksum
+      # TODO: Duplicated from the start of the method. Maybe remove from ther 
+      calculated_checksum = 0x00
+      preamble_counter = self.PREAMBLE_LENGTH
+      # Reset the temp packet to store values in. We decide after reading checksum if the data
+      # received is valid
+      self.temp_packet_data.set_to_default()
+
+
+
+    
+
+
+
+
+    
