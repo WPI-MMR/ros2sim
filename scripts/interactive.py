@@ -8,14 +8,15 @@ if __name__ == '__main__':
 
   try:
     while True:
-      cmd = input('Send the following command: ')
-      ser.write(cmd.encode())# + s.EOM.value)
+      for i in range(21):
+        cmd = int(input('Send the following command: '))
+        ser.write(bytes([cmd]))# + s.EOM.value)
 
-      res = b''
-      while not res.endswith(s.EOM.value):
-        res += ser.read()
+      # res = b''
+      # while not res.endswith(s.EOM.value):
+      #   res += ser.read()
       
-      print('Response: {}'.format(res))
+      # print('Response: {}'.format(res))
 
   except KeyboardInterrupt:
     pass
