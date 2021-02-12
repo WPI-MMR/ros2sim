@@ -182,3 +182,29 @@ class TestArduinoMocker(TestCase):
       for state in serialsim.list_of_states[2:10]:
         self.assertEqual(serialsim.validated_packed_data.get_joint_value_from_state(state),
           ground_truth.get_joint_value_from_state(state))
+
+  @patch('os.read')
+  def test_robot_state(self, mock_read):
+
+    with self.subTest('Wrong checksum'):
+      inp = [255, 255, 255,
+       255, 1, 1, 253]
+      parser = JsonParser(None)
+      serialsim = SerialSimulator(parser)
+      
+      # Defining a dummy value that is used during os.read()
+      # This value does not affect the test cases.
+      serialsim.master = "dummy_val"      
+
+      mock_read.side_effect = self.convert_to_bytes(inp)
+
+      for i in range(len(inp)):
+        serialsim.recv_data()
+
+      self.assertEqual(serialsim.serial_read_state, SerialReadState.INIT)
+      ground_truth = JointInformation()
+      ground_truth.set_all_joint_values(left_hip=1, left_knee=2, right_hip=3, right_knee=4,
+        left_shoulder=5, left_elbow=6, right_shoulder=7, right_elbow=8)
+      
+      self.assertEqual(serialsim.temp_packet_data.data_request, True)
+
