@@ -1,4 +1,6 @@
 from enum import Enum, auto
+from typing import List
+
 
 class special(Enum):
   EOM = b'\r\n'
@@ -80,6 +82,10 @@ class JointInformation():
     self.right_shoulder = right_shoulder
     self.right_elbow = right_elbow
 
+  def get_joint_values(self):
+    """Return a dictionary containing joint values based on joint ordering
+    """
+
   def get_joint_value_from_state(self, s: SerialReadState) -> int:
     """Returns the joint value of the corresponding SerialReadState
     """
@@ -101,5 +107,5 @@ class JointInformation():
       return self.right_elbow
 
 
-from .base_parser import Parser
-from .json_parser import JsonParser
+
+from .sim_executor import SimExecutor

@@ -5,14 +5,14 @@ import threading
 import copy
 import logging
 
-from ros2sim.parsers import Parser
+from ros2sim.parsers import SimExecutor
 from ros2sim.parsers import special as s
 from ros2sim.parsers import SerialReadState
 from ros2sim.parsers import JointInformation
 
 
 class SerialSimulator:
-  def __init__(self, parser: Parser, baudrate=9600):
+  def __init__(self, parser: SimExecutor, baudrate=9600):
     """Create a new Serial simulator
 
     Args:
@@ -67,7 +67,6 @@ class SerialSimulator:
         self.validated_packed_data.packet_available = False
         if self.validated_packed_data.data_request:
           logging.debug("Requesting data")
-          par
         else:
           logging.debug("Updating Joint Angles")
           logging.debug("The received data is: {}".format(self.validated_packed_data))
@@ -80,8 +79,8 @@ class SerialSimulator:
     #   response = self.parser.parse(request)
     #   os.write(self.master, response + s.EOM.value)
 
-  def dummy(self, i):
-    return i*i
+  def sensor_data_response(self):
+    pass
 
   def recv_data(self):
     """Checks to see if there is any data over the serial port to read. If there is,

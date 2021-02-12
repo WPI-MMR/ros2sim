@@ -12,7 +12,8 @@ if __name__ == '__main__':
 
   env.obs_factory.register_observation(obs.TorsoIMU(env.robot))
   env.obs_factory.register_observation(obs.MotorEncoder(env.robot))
-
-  parser = parsers.JsonParser(env)
+  print(env.get_obs())
+  parser = parsers.SimExecutor(env)
+  parser.action(None)
   simulator = sims.SerialSimulator(parser)
   simulator.serve()

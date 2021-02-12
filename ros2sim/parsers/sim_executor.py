@@ -1,36 +1,18 @@
 from typing import Text
 
-from ros2sim import parsers
 import json
 
-
-class JsonParser(parsers.Parser):
+class SimExecutor():
+  """Executes the necessary task based on the data recived from ROS
+  """
   def __init__(self, env):
-    super().__init__(env)
+    self.env = env
 
-    # TODO: Talk to @andrew_103 about how exactly the parsing and deparsing
-    # works for embedded systems. Need to evaluate if this state machine logic
-    # can be abstracted out to the parent class.
-    self._COMMAND_MAPPING = {
-      parsers.special.RESET: self.reset,
-      parsers.special.OBS_REQUEST: self.get_obs,
-      parsers.special.ACTION: self.action,
-    }
-
-  def parse(self, input_str: str) -> str:
-    resp = None
-    for cmd, func in self._COMMAND_MAPPING.items():
-      if input_str.startswith(cmd.value):
-        resp = func(input_str[len(cmd.value):])
-        break
-
-    return resp.encode() if resp else parsers.special.OK.value
-
-  def reset(self, _):
+  def reset(self):
     """Reset the environment."""
     self.env.reset()
 
-  def get_obs(self, _) -> Text:
+  def get_obs(self) -> Text:
     """Get the current observation of the robot.
 
     Returns:
@@ -48,8 +30,8 @@ class JsonParser(parsers.Parser):
     Args:
       cmd ([str]): JSON encoded dictionary of motor values
     """
+    print(self.env.joint_ordering)
     action_dict = json.loads(cmd)
-
     try:
       action = [action_dict[joint] for joint in self.env.joint_ordering]
       if len(action) != len(self.env.joint_ordering):
