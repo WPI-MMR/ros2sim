@@ -18,7 +18,6 @@ class SerialSimulator:
     Args:
       parser (Parser): Which parser to use
     """
-    logging.basicConfig(level=logging.DEBUG)
     # Based on the data collected, appropriate actions will be taken using the parser
     self.parser = parser
     self.PREAMBLE_LENGTH = 4
@@ -57,9 +56,7 @@ class SerialSimulator:
     """.format(s_name))
     
     thread.join()
-    
-
-
+  
   def listener(self):
     """Listens to data being sent over the serial port.
     Depending on the data, it takes the appropriate action and responds back.
@@ -70,6 +67,7 @@ class SerialSimulator:
         self.validated_packed_data.packet_available = False
         if self.validated_packed_data.data_request:
           logging.debug("Requesting data")
+          par
         else:
           logging.debug("Updating Joint Angles")
           logging.debug("The received data is: {}".format(self.validated_packed_data))
@@ -81,6 +79,9 @@ class SerialSimulator:
 
     #   response = self.parser.parse(request)
     #   os.write(self.master, response + s.EOM.value)
+
+  def dummy(self, i):
+    return i*i
 
   def recv_data(self):
     """Checks to see if there is any data over the serial port to read. If there is,
@@ -112,6 +113,7 @@ class SerialSimulator:
     received_data = os.read(self.master, 1)
     # Converting the data from bytes to int
     received_data = int(received_data.hex(), 16)
+    logging.debug("The recieved_data is: {}".format(received_data))
 
     if self.serial_read_state == SerialReadState.READ_PREAMBLE:
       if received_data == 255:

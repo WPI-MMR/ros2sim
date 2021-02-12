@@ -33,14 +33,7 @@ class JointInformation():
   def set_to_default(self):
     """Sets the object to the default values
     """
-    self.left_hip = 0
-    self.left_knee = 0
-    self.right_hip = 0
-    self.right_knee = 0
-    self.left_shoulder = 0
-    self.left_elbow = 0
-    self.right_shoulder = 0
-    self.right_elbow = 0
+    self.set_all_joint_values()
     self.checksum = 0
     self.checksum_error = False
     self.packet_available = False
@@ -74,7 +67,22 @@ class JointInformation():
     elif s == SerialReadState.READ_R_ELBOW:
       self.right_elbow = value
 
+  def set_all_joint_values(self, left_hip=0, left_knee=0, right_hip=0, right_knee=0,
+    left_shoulder=0, left_elbow=0, right_shoulder=0, right_elbow=0):
+    """Sets the joint angles based on the values of the named arguments
+    """
+    self.left_hip = left_hip
+    self.left_knee = left_knee
+    self.right_hip = right_hip
+    self.right_knee = right_knee
+    self.left_shoulder = left_shoulder
+    self.left_elbow = left_elbow
+    self.right_shoulder = right_shoulder
+    self.right_elbow = right_elbow
+
   def get_joint_value_from_state(self, s: SerialReadState) -> int:
+    """Returns the joint value of the corresponding SerialReadState
+    """
     if s == SerialReadState.READ_L_HIP:
       return self.left_hip
     elif s == SerialReadState.READ_L_KNEE:
@@ -90,8 +98,8 @@ class JointInformation():
     elif s == SerialReadState.READ_R_SHOULDER:
       return self.right_shoulder
     elif s == SerialReadState.READ_R_ELBOW:
-      return self.right_elbow 
+      return self.right_elbow
 
 
 from .base_parser import Parser
-from.json_parser import JsonParser
+from .json_parser import JsonParser
