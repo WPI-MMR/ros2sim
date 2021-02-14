@@ -64,6 +64,18 @@ class JointInformation():
     else:
       raise ValueError("Imu axes name should be one of these: θx, θy, θz")
   
+  def get_theta_value(self, s: str) -> int:
+    """Returns the imu value corresponding to the axes represented by s
+    """
+    if s == "θx":
+      return self.theta_x
+    elif s == "θy":
+      return self.theta_y
+    elif s == "θz":
+      return self.theta_z
+    else:
+      raise ValueError("Imu axes name should be one of these: θx, θy, θz")   
+
   def set_joint_value_from_state(self, s: SerialReadState, value: int):
     """Sets the joint value for the given SerialReadState
     """

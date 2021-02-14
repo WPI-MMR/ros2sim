@@ -10,7 +10,7 @@ class SimExecutor():
   """
   def __init__(self, env):
     self.env = env
-    self.joint_ordering_to_angle_dict = {
+    self.joint_ordering_to_read_state = {
       'FL_HFE': SerialReadState.READ_L_SHOULDER,
       'FL_KFE': SerialReadState.READ_L_ELBOW,
       'FR_HFE': SerialReadState.READ_R_SHOULDER,
@@ -27,7 +27,7 @@ class SimExecutor():
     """Reset the environment."""
     self.env.reset()
 
-  def get_obs(self, validated_packed_data: JointInformation) -> JointInformation:
+  def get_obs(self) -> JointInformation:
     """Get the current observation of the robot.
 
     Returns:
@@ -35,13 +35,14 @@ class SimExecutor():
         and the respective values.
     """
     values, labels = self.env.get_obs()
+    observation_packet = JointInformation()
     for i, label in enumerate(self.obs_list[0:3]):
-      validated_packed_data.set_theta_value(label, values[labels.index(label)])
+      observation_packet.set_theta_value(label, values[labels.index(label)])
     for i, label in enumerate(self.obs_list[3:]):
-      validated_packed_data.set_joint_value_from_state(
-        self.joint_ordering_to_angle_dict[label], values[labels.index(label)]
+      observation_packet.set_joint_value_from_state(
+        self.joint_ordering_to_read_state[label], values[labels.index(label)]
       )
-    return validated_packed_data
+    return observation_packet
 
   def action(self, packet: JointInformation):
     """Apply the action to the robot.
@@ -51,9 +52,17 @@ class SimExecutor():
     Args:
       cmd ([str]): JSON encoded dictionary of motor values
     """
-    try:
-      action = [packet.get_joint_value_from_state(self.joint_ordering_to_angle_dict[joint])
-        for joint in self.env.joint_ordering]
+    try:     
+      action = []
+      for joint in self.env.joint_ordering:
+        if joint[-5:] != "ANKLE":
+          action.append(
+            packet.get_joint_value_from_state(
+              self.joint_ordering_to_read_state[joint]
+            )
+          )
+        else:
+          action.append(0)
       if len(action) != len(self.env.joint_ordering):
         raise ValueError
 
