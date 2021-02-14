@@ -36,6 +36,9 @@ class JointInformation():
     """Sets the object to the default values
     """
     self.set_all_joint_values()
+    self.theta_x = 0
+    self.theta_y = 0
+    self.theta_z = 0
     self.checksum = 0
     self.checksum_error = False
     self.packet_available = False
@@ -49,6 +52,18 @@ class JointInformation():
     self.right_knee, self.left_shoulder, self.left_elbow, self.right_shoulder,
     self.checksum, self.checksum_error, self.packet_available, self.data_request)
 
+  def set_theta_value(self, s: str, val: int):
+    """Sets the imu theta value
+    """
+    if s == "θx":
+      self.theta_x = val
+    elif s == "θy":
+      self.theta_y = val
+    elif s == "θz":
+      self.theta_z = val
+    else:
+      raise ValueError("Imu axes name should be one of these: θx, θy, θz")
+  
   def set_joint_value_from_state(self, s: SerialReadState, value: int):
     """Sets the joint value for the given SerialReadState
     """
@@ -82,9 +97,10 @@ class JointInformation():
     self.right_shoulder = right_shoulder
     self.right_elbow = right_elbow
 
-  def get_joint_values(self):
+  def get_joint_values(self, ):
     """Return a dictionary containing joint values based on joint ordering
     """
+    pass
 
   def get_joint_value_from_state(self, s: SerialReadState) -> int:
     """Returns the joint value of the corresponding SerialReadState

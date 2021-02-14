@@ -22,6 +22,10 @@ class SerialSimulator:
     self.parser = parser
     self.PREAMBLE_LENGTH = 4
     self.DATA_BYTE_LENGTH = 2
+
+    self.num_joints = 8
+    self.imu_axes = 3
+
     # Packet to store data temporarily as we read it. This data is not validated
     self.temp_packet_data = JointInformation()
     # After validation, data is copied here. For all intents and purposes, this
@@ -80,7 +84,10 @@ class SerialSimulator:
     #   os.write(self.master, response + s.EOM.value)
 
   def sensor_data_response(self):
-    pass
+    for i in range(self.PREAMBLE_LENGTH):
+      os.write(self.master, bytes([255]))
+
+    
 
   def recv_data(self):
     """Checks to see if there is any data over the serial port to read. If there is,
