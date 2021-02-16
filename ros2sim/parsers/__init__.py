@@ -43,6 +43,7 @@ class JointInformation():
     self.checksum_error = False
     self.packet_available = False
     self.data_request = False
+    self.at_goal = False
 
   def __str__(self):
     return 'left_hip: {}\nleft_knee: {}\nright_hip: {}\nright_knee: {}\n'\
@@ -133,6 +134,24 @@ class JointInformation():
       return self.right_shoulder
     elif s == SerialReadState.READ_R_ELBOW:
       return self.right_elbow
+
+  def get_robot_state(self):
+    """Returns the state of the robot as a dictionary
+    """
+    return {
+      "theta_x": self.theta_x,
+      "theta_y": self.theta_y,
+      "theta_z": self.theta_z,
+      "l_hip": self.left_hip,
+      "l_knee": self.left_knee,
+      "r_hip": self.right_hip,
+      "r_knee": self.right_knee,
+      "l_shoulder": self.left_shoulder,
+      "l_elbow": self.left_elbow,
+      "r_shoulder": self.right_shoulder,
+      "r_elbow": self.right_elbow,
+      "at_goal": self.at_goal
+    }
 
 
 

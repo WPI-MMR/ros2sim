@@ -12,14 +12,15 @@ from ros2sim.parsers import JointInformation
 
 
 class SerialSimulator:
-  def __init__(self, parser: SimExecutor, baudrate=9600):
+  def __init__(self, sim_executor: SimExecutor, baudrate=9600):
     """Create a new Serial simulator
 
     Args:
-      parser (Parser): Which parser to use
+      sim_executor (SimExecutor): Uses this to get information or make an action on 
+      solo_realtime environment
     """
     # Based on the data collected, appropriate actions will be taken using the parser
-    self.parser = parser
+    self.sim_executor = sim_executor
     self.PREAMBLE_LENGTH = 4
     self.DATA_BYTE_LENGTH = 2
 
@@ -71,9 +72,12 @@ class SerialSimulator:
         self.validated_packed_data.packet_available = False
         if self.validated_packed_data.data_request:
           logging.debug("Requesting data")
+          observation_packet = self.sim_executor.get_obs()
+          self.sensor_data_response(observation_packet)
         else:
           logging.debug("Updating Joint Angles")
           logging.debug("The received data is: {}".format(self.validated_packed_data))
+          self.sim_executor.action(self.validated_packed_data)
 
     # while True:
     #   request = b''
@@ -83,11 +87,29 @@ class SerialSimulator:
     #   response = self.parser.parse(request)
     #   os.write(self.master, response + s.EOM.value)
 
-  def sensor_data_response(self):
+  def sensor_data_response(self, observation_packet: JointInformation):
     for i in range(self.PREAMBLE_LENGTH):
       os.write(self.master, bytes([255]))
 
+    robot_state = observation_packet.get_robot_state()
+    states = list(robot_state.keys())
+    raw_sum = 0
+    for state in states[:-1]:
+      value = robot_state[state]
+      raw_sum += value
+      val_1 = 255 if value // 256 > 0 else value
+      val_2 = value % 255 if value // 256 > 0 else 0
+      os.write(self.master, bytes([val_1]))
+      os.write(self.master, bytes([val_2]))
     
+    # At goal is only one byte
+    value = int(robot_state[states[-1]])
+    raw_sum += value
+    os.write(self.master, bytes([value]))
+
+    checksum = 255 - (raw_sum % 256)
+    os.write(self.master, bytes([checksum]))
+
 
   def recv_data(self):
     """Checks to see if there is any data over the serial port to read. If there is,

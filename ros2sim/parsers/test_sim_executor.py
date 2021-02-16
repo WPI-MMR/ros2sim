@@ -27,15 +27,20 @@ class TestSimExecutor(unittest.TestCase):
       joint_values["right_hip"], joint_values["right_knee"], 0]
     self.sim_executor.action(packet=packet)
     self.env_stub.step.assert_called_once_with(ground_truth)
+    self.assertEqual(self.sim_executor.current_goal, ground_truth)
 
-  def test_get_obs(self):
+  @parameterized.expand([
+    [[10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], True],
+    [[15, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], False],
+  ])
+  def test_get_obs(self, current_goal, at_goal):
     values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
       13, 14, 15, 16, 17, 18, 19, 20, 21]
     labels =  ['θx', 'θy', 'θz', 'vx', 'vy', 'vz',
       'wx', 'wy', 'wz', 'FL_HFE', 'FL_KFE', 'FL_ANKLE', 'FR_HFE', 'FR_KFE',
       'FR_ANKLE', 'HL_HFE', 'HL_KFE', 'HL_ANKLE', 'HR_HFE', 'HR_KFE', 'HR_ANKLE']
     self.env_stub.get_obs.return_value = (values, labels)
-    
+    self.sim_executor.current_goal = current_goal
     observation_packet = self.sim_executor.get_obs()
 
     for i, theta in enumerate(labels[:3]):
@@ -49,6 +54,8 @@ class TestSimExecutor(unittest.TestCase):
             self.sim_executor.joint_ordering_to_read_state[label]
           ), values[i+9]
         )
+    
+    self.assertEqual(observation_packet.at_goal, at_goal)
 
   def test_reset(self):
     self.sim_executor.reset()

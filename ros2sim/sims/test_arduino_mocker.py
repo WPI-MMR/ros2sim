@@ -2,7 +2,7 @@ import unittest
 from parameterized import parameterized
 
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock, patch, call
 
 from ros2sim.sims import SerialSimulator
 from ros2sim.parsers import SimExecutor, SerialReadState, JointInformation
@@ -33,8 +33,8 @@ class TestArduinoMocker(TestCase):
   @patch('os.read')
   def test_preamble(self, name, side_effect, read_state, mock_read):
     
-    parser = SimExecutor(None)
-    serialsim = SerialSimulator(parser)
+    sim_executor = SimExecutor(None)
+    serialsim = SerialSimulator(sim_executor)
     
     # Defining a dummy value that is used during os.read()
     # This value does not affect the test cases.
@@ -58,8 +58,8 @@ class TestArduinoMocker(TestCase):
   def test_checksum(self, name, side_effect, expected_result, mock_read):
 
     with self.subTest('Wrong checksum'):
-      parser = SimExecutor(None)
-      serialsim = SerialSimulator(parser)
+      sim_executor = SimExecutor(None)
+      serialsim = SerialSimulator(sim_executor)
       
       # Defining a dummy value that is used during os.read()
       # This value does not affect the test cases.
@@ -91,8 +91,8 @@ class TestArduinoMocker(TestCase):
   @patch('os.read')
   def test_joint_angles(self, name, side_effect, joint_values, mock_read):
 
-    parser = SimExecutor(None)
-    serialsim = SerialSimulator(parser)
+    sim_executor = SimExecutor(None)
+    serialsim = SerialSimulator(sim_executor)
     
     # Defining a dummy value that is used during os.read()
     # This value does not affect the test cases.
@@ -113,14 +113,14 @@ class TestArduinoMocker(TestCase):
         ground_truth.get_joint_value_from_state(state))
 
   @patch('os.read')
-  def test_robot_state(self, mock_read):
+  def test_sensor_data_request(self, mock_read):
 
     inp = [255, 255, 255,
       255, 1, 1, 253]
-    parser = SimExecutor(None)
-    serialsim = SerialSimulator(parser)
+    sim_executor = SimExecutor(None)
+    serialsim = SerialSimulator(sim_executor)
     
-    # Defining a dummy value that is used during os.read()
+    # Defining a dummy value that is used during os.revaluesad()
     # This value does not affect the test cases.
     serialsim.master = "dummy_val"      
 
@@ -135,4 +135,33 @@ class TestArduinoMocker(TestCase):
       left_shoulder=5, left_elbow=6, right_shoulder=7, right_elbow=8)
     
     self.assertEqual(serialsim.temp_packet_data.data_request, True)
+
+  @parameterized.expand([
+    [1, 2, 3, {"left_hip":4, "left_knee":5, "right_hip":6, "right_knee":7, "left_shoulder":8,
+      "left_elbow":9, "right_shoulder":10, "right_elbow":11}, True, [255, 255,
+      255, 255, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0, 10, 0, 11, 0, 1, 188]],
+    [256, 257, 258, {"left_hip":259, "left_knee":260, "right_hip":261, "right_knee":262, "left_shoulder":263,
+      "left_elbow":264, "right_shoulder":265, "right_elbow":266}, False, [255, 255,
+      255, 255, 255, 1, 255, 2, 255, 3, 255, 4, 255, 5, 255, 6, 255, 7, 255, 8, 255, 9, 255, 10, 255, 11, 0, 200]]
+  ])
+  @patch('os.write')
+  def test_sensor_data_response(self, theta_x, theta_y, theta_z, joint_values, at_goal,
+    os_write_input, mock_write):
+
+    sim_executor = SimExecutor(None)
+    serialsim = SerialSimulator(sim_executor)
+    # Defining a dummy value that is used during os.revaluesad()
+    # This value does not affect the test cases.
+    serial_port_mock = Mock()
+    serialsim.master = serial_port_mock 
+    
+    ground_truth = JointInformation()
+    ground_truth.set_all_joint_values(**joint_values)
+    ground_truth.set_theta_value("θx", theta_x)
+    ground_truth.set_theta_value("θy", theta_y)
+    ground_truth.set_theta_value("θz", theta_z)
+    ground_truth.at_goal = at_goal
+    serialsim.sensor_data_response(ground_truth)
+    calls = [call(serial_port_mock, bytes([i])) for i in os_write_input]
+    mock_write.assert_has_calls(calls)
 
