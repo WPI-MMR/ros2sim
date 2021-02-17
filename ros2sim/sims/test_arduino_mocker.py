@@ -12,7 +12,7 @@ from typing import List
 import logging
 
 # So we don't see any logs during tests. Change this if you want to debug
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.WARN)
 
 class TestArduinoMocker(TestCase):
   

@@ -96,6 +96,9 @@ class SerialSimulator:
     raw_sum = 0
     for state in states[:-1]:
       value = robot_state[state]
+      if (value < 0):
+        logging.error("Value {} of {} is out of range. Not sending this packet".format(str(value), state))
+        value *= -1
       raw_sum += value
       val_1 = 255 if value // 256 > 0 else value
       val_2 = value % 255 if value // 256 > 0 else 0

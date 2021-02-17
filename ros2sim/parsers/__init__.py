@@ -47,11 +47,12 @@ class JointInformation():
 
   def __str__(self):
     return 'left_hip: {}\nleft_knee: {}\nright_hip: {}\nright_knee: {}\n'\
-    'left_shoulder: {}\nleft_elbow: {}\nright_shoulder: {}\n' \
+    'left_shoulder: {}\nleft_elbow: {}\nright_shoulder: {}\nright_elbow: {}\n' \
     'checksum: {}\nchecksum_error: {}\npacket_available: {}\n' \
     'data_request: {}'.format(self.left_hip, self.left_knee, self.right_hip,
     self.right_knee, self.left_shoulder, self.left_elbow, self.right_shoulder,
-    self.checksum, self.checksum_error, self.packet_available, self.data_request)
+    self.right_elbow, self.checksum, self.checksum_error, self.packet_available,
+    self.data_request)
 
   def set_theta_value(self, s: str, val: int):
     """Sets the imu theta value

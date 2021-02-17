@@ -5,6 +5,7 @@ import json
 from ros2sim.parsers import SerialReadState, JointInformation
 
 import numpy as np
+import math
 
 class SimExecutor():
   """Executes the necessary task based on the data recived from ROS
@@ -49,6 +50,8 @@ class SimExecutor():
     # NOTE: Values are floating points but we only use ints for communication.
     # TODO: Modify get obs() to only return ints
     values, labels = self.env.get_obs()
+    values = np.degrees(values)
+    print(values)
     observation_packet = JointInformation()
     for i, label in enumerate(self.obs_list[0:3]):
       observation_packet.set_theta_value(label, int(values[labels.index(label)]))
@@ -58,6 +61,7 @@ class SimExecutor():
       )
     observation_packet.at_goal = np.allclose(values[9:], self.current_goal,
       rtol=0, atol=self.acceptable_tolerance)
+    print(observation_packet)
     return observation_packet
 
   def action(self, packet: JointInformation):
@@ -69,21 +73,23 @@ class SimExecutor():
       cmd ([str]): JSON encoded dictionary of motor values
     """
     try:     
-      action = []
+      action_deg = []
       for joint in self.env.joint_ordering:
         # We want to ignore all the ankle joints
         if joint[-5:] != "ANKLE":
-          action.append(
+          action_deg.append(
             packet.get_joint_value_from_state(
               self.joint_ordering_to_read_state[joint]
             )
           )
         else:
-          action.append(0)
-      if len(action) != len(self.env.joint_ordering):
+          action_deg.append(0)
+      if len(action_deg) != len(self.env.joint_ordering):
         raise ValueError
-      self.current_goal = action
-      self.env.step(action)
+      action_rad = np.radians(action_deg)
+      self.current_goal = action_rad
+      print(action_rad)
+      self.env.step(action_rad)
     except:
       raise ValueError('The action needs to have the same number of joint as '
                        'the robot')
