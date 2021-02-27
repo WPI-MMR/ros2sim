@@ -26,7 +26,7 @@ class SimExecutor():
     self.obs_list = ['θx', 'θy', 'θz', 'FL_HFE', 'FL_KFE', 'FR_HFE',
       'FR_KFE', 'HL_HFE', 'HL_KFE', 'HR_HFE', 'HR_KFE']
     
-    # This should be the list of joint values corresponding to the
+    # This should be the numpy array of joint values corresponding to the
     # joint ordering in self.env.joint_ordering
     self.current_goal = None
     # Acceptable tolerance in degrees.
@@ -59,8 +59,8 @@ class SimExecutor():
       observation_packet.set_joint_value_from_state(
         self.joint_ordering_to_read_state[label], int(values[labels.index(label)])
       )
-    observation_packet.at_goal = np.allclose(values[9:], self.current_goal,
-      rtol=0, atol=self.acceptable_tolerance)
+    # observation_packet.at_goal = np.allclose(values[9:], self.current_goal,
+    #   rtol=0, atol=self.acceptable_tolerance)
     print(observation_packet)
     return observation_packet
 

@@ -22,11 +22,11 @@ if __name__ == '__main__':
       if cmd == 1:
         for val in test_case:
           ser.write(bytes([val]))
-      else:
+      elif cmd == 2:
         inp = [255, 255, 255, 255, 1, 1, 253]
         for i in inp:
           ser.write(bytes([i]))
-
+      elif cmd == 3:
         if ser.in_waiting:
           for i in range(28):
             received_data = ser.read()

@@ -13,6 +13,7 @@ class special(Enum):
 class SerialReadState(Enum):
   INIT = auto()
   READ_PREAMBLE = auto()
+  READ_DATA_REQUEST = auto()
   READ_L_HIP = auto()
   READ_L_KNEE = auto()
   READ_R_HIP = auto()

@@ -98,7 +98,7 @@ class SerialSimulator:
       value = robot_state[state]
       if (value < 0):
         logging.error("Value {} of {} is out of range. Not sending this packet".format(str(value), state))
-        value *= -1
+        value += 360
       raw_sum += value
       val_1 = 255 if value // 256 > 0 else value
       val_2 = value % 255 if value // 256 > 0 else 0
@@ -154,33 +154,25 @@ class SerialSimulator:
           self.preamble_counter = self.PREAMBLE_LENGTH
           self.serial_read_state = SerialReadState.READ_L_HIP
       else:
-        # TODO: Ask Andrew why do we even need this. If it is corrupt,
-        # shouldn't we discard it?
+        ## This means the data is corrupt and keep reading it until you clear the packet
+        ## TODO: Will this break for the case where end of the corrupt packet has 255 at the end
+        # and the new packet if valid?
         self.preamble_counter = self.PREAMBLE_LENGTH
         logging.debug("In READ_PREAMBLE and resetting preamble counter: {}".format(self.preamble_counter))
 
-    elif self.serial_read_state == SerialReadState.READ_L_HIP:
-      # TODO: Ask Andrew about this condition. Also why couldn't we add a extra byte in the protocol.
-      # The request is to get back the robot state
-      if self.data_byte_counter == 1 and self.temp_packet_data.left_hip == received_data:
+    elif self.serial_read_state == SerialReadState.READ_DATA_REQUEST:
+      if received_data > 0:
+        logging.debug("In READ_DATA_REQUEST with request for data")
         self.temp_packet_data.data_request = True
-        self.temp_packet_data.left_hip += received_data
-        self.calculated_checksum += received_data
-        self.data_byte_counter = self.DATA_BYTE_LENGTH
         self.serial_read_state = SerialReadState.READ_CHECKSUM
-        logging.debug("In READ_L_HIP and received a request to get sensor data")
       else:
-        logging.debug("In READ_L_HIP with data_byte_counter: {}".format(self.data_byte_counter))
-        self.temp_packet_data.left_hip += received_data
-        self.calculated_checksum += received_data
-        self.data_byte_counter -= 1
-        if self.data_byte_counter == 0:
-          logging.debug("In {} with joint angle: {}".format(self.serial_read_state.name, self.temp_packet_data.left_hip)) 
-          self.data_byte_counter = self.DATA_BYTE_LENGTH
-          self.serial_read_state = SerialReadState.READ_L_KNEE
+        logging.debug("In READ_DATA_REQUEST with joint angles")
+        self.temp_packet_data = False
+        self.serial_read_state = SerialReadState.READ_L_HIP
+      self.calculated_checksum += received_data
           
     # Reading all the joint states except READ_L_HIP
-    elif self.serial_read_state in self.list_of_states[3:10]:
+    elif self.serial_read_state in self.list_of_states[3:11]:
       logging.debug("In {} with data_byte_counter: {}".format(self.serial_read_state.name, self.data_byte_counter))
       val = self.temp_packet_data.get_joint_value_from_state(self.serial_read_state)
       val += received_data
