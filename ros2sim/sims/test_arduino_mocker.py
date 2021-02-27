@@ -25,9 +25,9 @@ class TestArduinoMocker(TestCase):
     return byte_inp
   
   @parameterized.expand([
-    ["correct_read", [255, 255, 255, 255, 1, 0, 2, 0, 3, 0, 4,
-      0, 5, 0, 6, 0, 7, 0, 8, 0, 219], SerialReadState.READ_L_HIP],
-    ["incorrect_read", [255, 255, 255, 254, 1, 0, 2, 0, 3, 0,
+    ["correct_read", [255, 255, 255, 255, 0, 1, 0, 2, 0, 3, 0, 4,
+      0, 5, 0, 6, 0, 7, 0, 8, 0, 219], SerialReadState.READ_DATA_REQUEST],
+    ["incorrect_read", [255, 255, 255, 254, 0, 1, 0, 2, 0, 3, 0,
       4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 219], SerialReadState.READ_PREAMBLE]
   ])
   @patch('os.read')
@@ -49,9 +49,9 @@ class TestArduinoMocker(TestCase):
     self.assertEqual(serialsim.serial_read_state, read_state)
 
   @parameterized.expand([
-    ["wrong_checksum", [255, 255, 255, 255, 1, 0, 2, 0, 3, 0, 4, 0,
-      5, 0, 6, 0, 7, 0, 8, 0, 255], True],
-    ["correct_checksum", [255, 255, 255, 255, 1, 0, 2, 0, 3, 0, 4,
+    ["wrong_checksum", [255, 255, 255, 255, 0, 1, 0, 2, 0, 3, 0, 4, 0,
+      5, 0, 6, 0, 7, 0, 8, 0, 220], True],
+    ["correct_checksum", [255, 255, 255, 255, 0, 1, 0, 2, 0, 3, 0, 4,
       0, 5, 0, 6, 0, 7, 0, 8, 0, 219], False]
   ])
   @patch('os.read')
@@ -78,13 +78,13 @@ class TestArduinoMocker(TestCase):
       self.assertEqual(serialsim.temp_packet_data.checksum_error, expected_result)
 
   @parameterized.expand([
-    ["joint_angles_less_than_256", [255, 255, 255, 255, 1, 0, 2, 0, 3, 0,
+    ["joint_angles_less_than_256", [255, 255, 255, 255, 0, 1, 0, 2, 0, 3, 0,
       4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 219], {"left_hip":1, "left_knee":2, "right_hip":3, "right_knee":4,
       "left_shoulder":5, "left_elbow":6, "right_shoulder":7, "right_elbow":8}],
-    ["joint_angles_equal_to_256", [255, 255, 255, 255, 255, 1, 255, 1, 255,
+    ["joint_angles_equal_to_256", [255, 255, 255, 255, 0, 255, 1, 255, 1, 255,
       1, 255, 1, 255, 1, 255, 1, 255, 1, 255, 1, 255], {"left_hip":256, "left_knee":256, "right_hip":256,
       "right_knee":256, "left_shoulder":256, "left_elbow":256, "right_shoulder":256, "right_elbow":256}],
-    ["joint_angles_greater_than_256", [255, 255, 255, 255, 255, 2, 255, 3, 255, 4, 255, 5, 255, 6, 255,
+    ["joint_angles_greater_than_256", [255, 255, 255, 255, 0, 255, 2, 255, 3, 255, 4, 255, 5, 255, 6, 255,
       7, 255, 8, 255, 9, 219], {"left_hip":257, "left_knee":258, "right_hip":259, "right_knee":260,
       "left_shoulder":261, "left_elbow":262, "right_shoulder":263, "right_elbow":264}]
   ])
@@ -116,7 +116,7 @@ class TestArduinoMocker(TestCase):
   def test_sensor_data_request(self, mock_read):
 
     inp = [255, 255, 255,
-      255, 1, 1, 253]
+      255, 1, 254]
     sim_executor = SimExecutor(None)
     serialsim = SerialSimulator(sim_executor)
     

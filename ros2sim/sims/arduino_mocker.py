@@ -152,7 +152,7 @@ class SerialSimulator:
         self.preamble_counter -= 1
         if self.preamble_counter == 0:
           self.preamble_counter = self.PREAMBLE_LENGTH
-          self.serial_read_state = SerialReadState.READ_L_HIP
+          self.serial_read_state = SerialReadState.READ_DATA_REQUEST
       else:
         ## This means the data is corrupt and keep reading it until you clear the packet
         ## TODO: Will this break for the case where end of the corrupt packet has 255 at the end
@@ -167,7 +167,7 @@ class SerialSimulator:
         self.serial_read_state = SerialReadState.READ_CHECKSUM
       else:
         logging.debug("In READ_DATA_REQUEST with joint angles")
-        self.temp_packet_data = False
+        self.temp_packet_data.data_request = False
         self.serial_read_state = SerialReadState.READ_L_HIP
       self.calculated_checksum += received_data
           

@@ -51,7 +51,6 @@ class SimExecutor():
     # TODO: Modify get obs() to only return ints
     values, labels = self.env.get_obs()
     values = np.degrees(values)
-    print(values)
     observation_packet = JointInformation()
     for i, label in enumerate(self.obs_list[0:3]):
       observation_packet.set_theta_value(label, int(values[labels.index(label)]))
@@ -59,9 +58,8 @@ class SimExecutor():
       observation_packet.set_joint_value_from_state(
         self.joint_ordering_to_read_state[label], int(values[labels.index(label)])
       )
-    # observation_packet.at_goal = np.allclose(values[9:], self.current_goal,
-    #   rtol=0, atol=self.acceptable_tolerance)
-    print(observation_packet)
+    observation_packet.at_goal = np.allclose(values[9:], np.degrees(self.current_goal),
+      rtol=0, atol=self.acceptable_tolerance)
     return observation_packet
 
   def action(self, packet: JointInformation):
@@ -88,7 +86,6 @@ class SimExecutor():
         raise ValueError
       action_rad = np.radians(action_deg)
       self.current_goal = action_rad
-      print(action_rad)
       self.env.step(action_rad)
     except:
       raise ValueError('The action needs to have the same number of joint as '
