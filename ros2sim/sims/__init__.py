@@ -1,1 +1,1 @@
-from .serial import SerialSimulator
+from .arduino_mocker import SerialSimulator
