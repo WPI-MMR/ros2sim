@@ -29,7 +29,8 @@ class SimExecutor():
     # This should be the numpy array of joint values corresponding to the
     # joint ordering in self.env.joint_ordering
     self.current_goal = None
-    # Acceptable tolerance in degrees.
+    # Acceptable tolerance in degrees. Can be changed to 0 if we want to only consider
+    # perfect scenerios
     self.acceptable_tolerance = 2
 
   def reset(self):
@@ -40,8 +41,7 @@ class SimExecutor():
     """Get the current observation of the robot.
 
     Returns:
-      str: A JSON-encoded string of a dictionary of the registered observation
-        and the respective values.
+      JointInformation: IMU and joint values stored in JointInformation class
     """
     # The first 9 elements in value are regarding orientation and
     # the next 12 are joint angle values. Labels and values have the same length
@@ -51,6 +51,15 @@ class SimExecutor():
     # TODO: Modify get obs() to only return ints
     values, labels = self.env.get_obs()
     values = np.degrees(values)
+    for i, deg in enumerate(values):
+      if deg < 0:
+        values[i] += 360
+
+    ## This is important to preserve the exact values of joint values.
+    # Converting frop degrees to radians and back to degrees can cause some floating point
+    # differences to exist. This essentially gets rid of them.
+    values = np.round(values)
+
     observation_packet = JointInformation()
     for i, label in enumerate(self.obs_list[0:3]):
       observation_packet.set_theta_value(label, int(values[labels.index(label)]))
@@ -63,12 +72,11 @@ class SimExecutor():
     return observation_packet
 
   def action(self, packet: JointInformation):
-    """Apply the action to the robot.
-
-    Note that in this case, these values will usually be motor position values.
+    """Apply the action to the robot. The values provided are in degrees. This is converted to radians
+    in the range -pi to pi to be used with gym solo.
 
     Args:
-      cmd ([str]): JSON encoded dictionary of motor values
+      packet (JointInformation): A joint information packet that contains the joint values to be executed
     """
     try:     
       action_deg = []
@@ -82,9 +90,18 @@ class SimExecutor():
           )
         else:
           action_deg.append(0)
+      
+      # If the number of joint values provided has a mismatch with the number of joints in teh solo8 model
       if len(action_deg) != len(self.env.joint_ordering):
         raise ValueError
+      
       action_rad = np.radians(action_deg)
+
+      # Making sure the range is between -pi to pi
+      for i, rad in enumerate(action_rad):
+        if rad > math.pi:
+          action_rad[i] -= (2 * math.pi)
+
       self.current_goal = action_rad
       self.env.step(action_rad)
     except:

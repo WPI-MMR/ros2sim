@@ -6,7 +6,6 @@ import copy
 import logging
 
 from ros2sim.parsers import SimExecutor
-from ros2sim.parsers import special as s
 from ros2sim.parsers import SerialReadState
 from ros2sim.parsers import JointInformation
 
@@ -98,7 +97,7 @@ class SerialSimulator:
       value = robot_state[state]
       if (value < 0):
         logging.error("Value {} of {} is out of range. Not sending this packet".format(str(value), state))
-        value += 360
+        return
       raw_sum += value
       val_1 = 255 if value // 256 > 0 else value
       val_2 = value % 255 if value // 256 > 0 else 0

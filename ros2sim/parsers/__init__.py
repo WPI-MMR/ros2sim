@@ -2,14 +2,6 @@ from enum import Enum, auto
 from typing import List
 
 
-class special(Enum):
-  EOM = b'\r\n'
-  ACTION = b'ACTION'
-  RESET = b'RESET'
-  OBS_REQUEST = b'OBS'
-  OK = b'OK'
-
-
 class SerialReadState(Enum):
   INIT = auto()
   READ_PREAMBLE = auto()
